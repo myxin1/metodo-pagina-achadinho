@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz – Achadinhos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #0f1117;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 28px 16px 48px;
+      color: #fff;
+    }
+
+    /* ===== HEADLINE EXTERNA ===== */
+    .headline-ext {
+      width: 100%;
+      max-width: 560px;
+      text-align: center;
+      margin-bottom: 22px;
+    }
+
+    .headline-ext h1 {
+      font-size: clamp(20px, 5.5vw, 30px);
+      font-weight: 900;
+      line-height: 1.3;
+      color: #fff;
+    }
+
+    .headline-ext h1 em {
+      color: #25D366;
+      font-style: normal;
+    }
+
+    .headline-ext p {
+      margin-top: 10px;
+      font-size: clamp(12px, 3.2vw, 14px);
+      color: #888;
+      line-height: 1.6;
+    }
+
+    /* ===== PROGRESS BAR ===== */
+    .progress-wrap {
+      width: 100%;
+      max-width: 560px;
+      margin-bottom: 18px;
+    }
+
+    .progress-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .progress-label {
+      font-size: 11px;
+      color: #aaa;
+      letter-spacing: 0.5px;
+    }
+
+    .progress-pct {
+      font-size: 11px;
+      color: #25D366;
+      font-weight: 700;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: #2a2a2a;
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #25D366, #128C7E);
+      border-radius: 99px;
+      transition: width 0.5s ease;
+    }
+
+    /* ===== CARD ===== */
+    .card {
+      width: 100%;
+      max-width: 560px;
+      background: #1a1d27;
+      border-radius: 20px;
+      padding: 32px 26px 28px;
+      border: 1px solid #2a2d3a;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    }
+
+    /* ===== STEP ===== */
+    .step { display: none; }
+    .step.active {
+      display: block;
+      animation: fadeUp 0.35s ease forwards;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ===== PERGUNTA ===== */
+    .step-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #25D366;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 10px;
+    }
+
+    .question {
+      font-size: clamp(16px, 4.5vw, 21px);
+      font-weight: 800;
+      line-height: 1.4;
+      margin-bottom: 22px;
+      color: #fff;
+    }
+
+    .question em {
+      color: #25D366;
+      font-style: normal;
+    }
+
+    /* ===== OPÇÕES ===== */
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .option {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      background: #22263a;
+      border: 2px solid #2e3245;
+      border-radius: 12px;
+      padding: 13px 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: clamp(12px, 3.3vw, 14px);
+      font-weight: 600;
+      color: #ccc;
+      text-align: left;
+    }
+
+    .option:hover {
+      border-color: #25D366;
+      background: #1b2b25;
+      color: #fff;
+      transform: translateX(3px);
+    }
+
+    .option.selected {
+      border-color: #25D366;
+      background: #1b2b25;
+      color: #25D366;
+    }
+
+    .option-icon {
+      font-size: 20px;
+      flex-shrink: 0;
+      width: 28px;
+      text-align: center;
+    }
+
+    /* ===== NAVEGAÇÃO (voltar + avançar) ===== */
+    .nav-btns {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+      align-items: center;
+    }
+
+    .btn-back {
+      flex-shrink: 0;
+      padding: 13px 18px;
+      background: transparent;
+      color: #666;
+      font-family: 'Poppins', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      border: 2px solid #2e3245;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-back:hover {
+      border-color: #555;
+      color: #aaa;
+    }
+
+    .btn-back:disabled {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .btn-next {
+      flex: 1;
+      padding: 13px;
+      background: #25D366;
+      color: #fff;
+      font-family: 'Poppins', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      transition: background 0.2s, transform 0.1s, opacity 0.2s;
+      opacity: 0.35;
+      pointer-events: none;
+    }
+
+    .btn-next.enabled {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .btn-next:hover  { background: #1ebe58; }
+    .btn-next:active { transform: scale(0.98); }
+
+    /* ===== RESULTADO FINAL ===== */
+    #step-resultado {
+      text-align: center;
+    }
+
+    .res-icon {
+      font-size: 38px;
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .res-title {
+      font-size: clamp(20px, 5.5vw, 26px);
+      font-weight: 900;
+      line-height: 1.3;
+      color: #111;
+      margin-bottom: 6px;
+    }
+
+    .res-title span { color: #e53935; }
+
+    .res-subtitle {
+      font-size: clamp(13px, 3.5vw, 15px);
+      font-weight: 700;
+      color: #25a244;
+      margin-bottom: 18px;
+    }
+
+    .res-img-wrap {
+      width: 100%;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 18px;
+      background: #ddd;
+    }
+
+    .res-img-wrap img {
+      width: 100%;
+      display: block;
+      border-radius: 12px;
+    }
+
+    .res-img-placeholder {
+      width: 100%;
+      aspect-ratio: 9/16;
+      max-height: 320px;
+      background: #e0e0e0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #999;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 12px;
+    }
+
+    .res-box {
+      background: #f0faf4;
+      border: 1.5px solid #b2dfcc;
+      border-radius: 14px;
+      padding: 18px 16px;
+      text-align: left;
+      margin-bottom: 20px;
+    }
+
+    .res-box p {
+      font-size: clamp(12px, 3.3vw, 14px);
+      color: #333;
+      line-height: 1.7;
+      margin-bottom: 14px;
+    }
+
+    .res-box p strong { color: #111; }
+
+    .res-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .res-list li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: clamp(12px, 3.2vw, 14px);
+      font-weight: 600;
+      color: #333;
+    }
+
+    .res-list li::before {
+      content: '';
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+      background: #25a244;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E");
+      background-size: 13px;
+      background-repeat: no-repeat;
+      background-position: center;
+    }
+
+    .btn-cta {
+      display: block;
+      width: 100%;
+      padding: 16px;
+      background: #f5a623;
+      color: #fff;
+      font-family: 'Poppins', sans-serif;
+      font-size: clamp(14px, 4vw, 16px);
+      font-weight: 800;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      text-decoration: none;
+      letter-spacing: 0.3px;
+      animation: pulse 1.8s infinite;
+      transition: transform 0.1s;
+    }
+
+    .btn-cta:active { transform: scale(0.98); }
+
+    @keyframes pulse {
+      0%   { box-shadow: 0 0 0 0 rgba(245,166,35,0.6); }
+      60%  { box-shadow: 0 0 0 16px rgba(245,166,35,0); }
+      100% { box-shadow: 0 0 0 0 rgba(245,166,35,0); }
+    }
+
+    /* ===== FOOTER ===== */
+    .footer {
+      margin-top: 28px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #2ecc71;
+      text-align: center;
+      letter-spacing: 0.5px;
+    }
+
+    /* Card vira branco no resultado */
+    .card.resultado-ativo {
+      background: #fff;
+      border-color: #e0e0e0;
+    }
+
+    /* ===== RESPONSIVO ===== */
+    @media (max-width: 380px) {
+      .card { padding: 22px 14px 22px; }
+      .option { padding: 11px 12px; }
+      .btn-back { padding: 12px 14px; font-size: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADLINE FORA DO CARD -->
+  <div class="headline-ext" id="headline-ext">
+    <h1>Está conseguindo <em>encher seus grupos</em> de achadinhos?</h1>
+    <p>Responda 4 perguntas rápidas e descubra o que está travando seu crescimento.</p>
+  </div>
+
+  <!-- BARRA DE PROGRESSO -->
+  <div class="progress-wrap">
+    <div class="progress-top">
+      <span class="progress-label" id="progress-label">Etapa 1 de 4</span>
+      <span class="progress-pct" id="progress-pct">0%</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+    </div>
+  </div>
+
+  <!-- CARD DO QUIZ -->
+  <div class="card">
+
+    <!-- ===== STEP 1 ===== -->
+    <div class="step active" id="step-1">
+      <div class="step-label">Pergunta 1 de 4</div>
+      <h2 class="question">Você tem dificuldade em <em>atrair membros</em> para o seu grupo?</h2>
+      <div class="options">
+        <div class="option" onclick="escolher(this, 1)">
+          <span class="option-icon">🚀</span>
+          Não, meu grupo sempre está cheio
+        </div>
+        <div class="option" onclick="escolher(this, 1)">
+          <span class="option-icon">😐</span>
+          Às vezes, poderia ser melhor
+        </div>
+        <div class="option" onclick="escolher(this, 1)">
+          <span class="option-icon">😟</span>
+          Sim, está muito difícil encher
+        </div>
+        <div class="option" onclick="escolher(this, 1)">
+          <span class="option-icon">🆕</span>
+          Acabei de criar meu grupo
+        </div>
+      </div>
+      <div class="nav-btns">
+        <button class="btn-back" disabled onclick="voltar(1)">← Voltar</button>
+        <button class="btn-next" id="btn-1" onclick="avancar(2)">Próximo →</button>
+      </div>
+    </div>
+
+    <!-- ===== STEP 2 ===== -->
+    <div class="step" id="step-2">
+      <div class="step-label">Pergunta 2 de 4</div>
+      <h2 class="question">Como você <em>divulga</em> seu grupo hoje?</h2>
+      <div class="options">
+        <div class="option" onclick="escolher(this, 2)">
+          <span class="option-icon">📱</span>
+          Só pelo meu Instagram ou perfil pessoal
+        </div>
+        <div class="option" onclick="escolher(this, 2)">
+          <span class="option-icon">👥</span>
+          Peço para amigos e conhecidos indicarem
+        </div>
+        <div class="option" onclick="escolher(this, 2)">
+          <span class="option-icon">💸</span>
+          Já invisto em tráfego pago (anúncios)
+        </div>
+        <div class="option" onclick="escolher(this, 2)">
+          <span class="option-icon">🤷</span>
+          Não divulgo, não sei como fazer isso
+        </div>
+      </div>
+      <div class="nav-btns">
+        <button class="btn-back" onclick="voltar(1)">← Voltar</button>
+        <button class="btn-next" id="btn-2" onclick="avancar(3)">Próximo →</button>
+      </div>
+    </div>
+
+    <!-- ===== STEP 3 ===== -->
+    <div class="step" id="step-3">
+      <div class="step-label">Pergunta 3 de 4</div>
+      <h2 class="question">Quantos membros têm <em>seus grupos</em> hoje?</h2>
+      <div class="options">
+        <div class="option" onclick="escolher(this, 3)">
+          <span class="option-icon">👶</span>
+          Menos de 100 pessoas
+        </div>
+        <div class="option" onclick="escolher(this, 3)">
+          <span class="option-icon">📈</span>
+          Entre 100 e 500 pessoas
+        </div>
+        <div class="option" onclick="escolher(this, 3)">
+          <span class="option-icon">🔥</span>
+          Entre 500 e 1.000 pessoas
+        </div>
+        <div class="option" onclick="escolher(this, 3)">
+          <span class="option-icon">💎</span>
+          Mais de 1.000 pessoas
+        </div>
+      </div>
+      <div class="nav-btns">
+        <button class="btn-back" onclick="voltar(2)">← Voltar</button>
+        <button class="btn-next" id="btn-3" onclick="avancar(4)">Próximo →</button>
+      </div>
+    </div>
+
+    <!-- ===== STEP 4 ===== -->
+    <div class="step" id="step-4">
+      <div class="step-label">Pergunta 4 de 4</div>
+      <h2 class="question">Qual é o <em>seu maior desafio</em> com os grupos agora?</h2>
+      <div class="options">
+        <div class="option" onclick="escolher(this, 4)">
+          <span class="option-icon">📉</span>
+          As pessoas entram e saem rápido
+        </div>
+        <div class="option" onclick="escolher(this, 4)">
+          <span class="option-icon">🔇</span>
+          O grupo fica silencioso, sem engajamento
+        </div>
+        <div class="option" onclick="escolher(this, 4)">
+          <span class="option-icon">🚪</span>
+          Não sei como atrair pessoas novas
+        </div>
+        <div class="option" onclick="escolher(this, 4)">
+          <span class="option-icon">💰</span>
+          Não consigo transformar o grupo em renda
+        </div>
+      </div>
+      <div class="nav-btns">
+        <button class="btn-back" onclick="voltar(3)">← Voltar</button>
+        <button class="btn-next" id="btn-4" onclick="avancar('resultado')">Ver meu resultado →</button>
+      </div>
+    </div>
+
+    <!-- ===== RESULTADO ===== -->
+    <div class="step" id="step-resultado">
+      <span class="res-icon">⚠️</span>
+      <h2 class="res-title">Seus Resultados <span>Não Estão<br>Satisfatórios</span></h2>
+      <p class="res-subtitle">Mas Temos a Solução! 🏆</p>
+
+      <!-- VÍDEO -->
+      <div class="res-img-wrap">
+        <video controls autoplay muted playsinline
+               style="width:100%;border-radius:12px;display:block;">
+          <source src="video.mp4" type="video/mp4">
+        </video>
+      </div>
+
+      <div class="res-box">
+        <p>Seus problemas têm solução! O <strong>Método Página Achadinho</strong> te entrega uma Landing Page Completa, ideal pra você captar e encher seus grupos de achadinhos com <strong>Leads qualificados</strong>, todos prontos para participar e comprar!</p>
+        <ul class="res-list">
+          <li>Grupos lotados de leads quentes</li>
+          <li>Leads prontos para comprar</li>
+          <li>Ideal para quem trabalha com tráfego Orgânico ou Pago!</li>
+          <li>Resultados em poucos dias</li>
+        </ul>
+      </div>
+
+      <a href="#" class="btn-cta">Descobrir Como Começar! →</a>
+    </div>
+
+  </div><!-- /card -->
+
+  <div class="footer">© Método Página Achadinho</div>
+
+  <script>
+  const totalSteps = 4;
+
+  function escolher(el, step) {
+    el.closest('.options').querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+
+    const btn = document.getElementById('btn-' + step);
+    if (btn) btn.classList.add('enabled');
+  }
+
+  function avancar(proximo) {
+    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+    document.getElementById('step-' + proximo).classList.add('active');
+
+    const isResultado = proximo === 'resultado';
+    const stepNum = isResultado ? totalSteps : parseInt(proximo);
+    const pct = isResultado ? 100 : Math.round(((stepNum - 1) / totalSteps) * 100);
+
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('progress-pct').textContent = pct + '%';
+    document.getElementById('progress-label').textContent = isResultado
+      ? 'Calculando resultado...'
+      : 'Etapa ' + stepNum + ' de ' + totalSteps;
+
+    // Esconde headline no resultado; card vira branco
+    document.getElementById('headline-ext').style.display = isResultado ? 'none' : '';
+    document.querySelector('.card').classList.toggle('resultado-ativo', isResultado);
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function voltar(anterior) {
+    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+    document.getElementById('step-' + anterior).classList.add('active');
+
+    const pct = Math.round(((anterior - 1) / totalSteps) * 100);
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('progress-pct').textContent = pct + '%';
+    document.getElementById('progress-label').textContent = 'Etapa ' + anterior + ' de ' + totalSteps;
+    document.getElementById('headline-ext').style.display = '';
+    document.querySelector('.card').classList.remove('resultado-ativo');
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  </script>
+
+</body>
+</html>

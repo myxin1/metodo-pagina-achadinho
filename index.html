@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Achadinhos – Venha Economizar Todos os Dias</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Poppins', Arial, sans-serif;
+      background: #f0f2f5;
+      min-height: 100vh;
+    }
+
+    /* ===== BARRA TOPO ===== */
+    #barra-topo {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      background: linear-gradient(135deg, #25D366, #128C7E);
+      color: #fff;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 700;
+      padding: 10px 16px;
+      letter-spacing: 1px;
+      transition: transform 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    /* ===== POPUP CONTAINER ===== */
+    #popup-container {
+      position: fixed;
+      bottom: 20px;
+      left: 16px;
+      z-index: 9999;
+    }
+
+    .popup {
+      background: #fff;
+      padding: 12px 14px;
+      border-radius: 10px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 260px;
+      font-family: Arial, sans-serif;
+      animation: fadeIn 0.5s ease forwards;
+      border-left: 4px solid #25D366;
+    }
+
+    .popup strong { font-size: 14px; display: block; color: #111; }
+    .popup small  { font-size: 12px; color: #555; }
+
+    @keyframes fadeIn {
+      from { opacity:0; transform: translateY(20px); }
+      to   { opacity:1; transform: translateY(0); }
+    }
+    @keyframes fadeOut {
+      from { opacity:1; transform: translateY(0); }
+      to   { opacity:0; transform: translateY(20px); }
+    }
+
+    /* ===== CONTAINER PRINCIPAL ===== */
+    .wrapper {
+      max-width: 520px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 58px 12px 40px;
+    }
+
+    /* ===== HEADER ===== */
+    .header-box {
+      background: linear-gradient(135deg, #25D366, #128C7E);
+      border-radius: 16px 16px 0 0;
+      padding: 22px 16px;
+      text-align: center;
+    }
+
+    .header-box h1 {
+      color: #fff;
+      font-size: clamp(14px, 3.8vw, 18px);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      text-shadow: none;
+      opacity: 0.95;
+    }
+
+    /* ===== CARD BODY ===== */
+    .card-body {
+      background: #fff;
+      border-radius: 0 0 16px 16px;
+      border: 4px solid #25D366;
+      border-top: 0;
+      padding: 28px 16px 30px;
+      text-align: center;
+    }
+
+    /* ===== HEADLINE ===== */
+    .headline {
+      font-size: clamp(13px, 3.8vw, 17px);
+      font-weight: 800;
+      color: #0d6e3e;
+      text-transform: uppercase;
+      line-height: 1.4;
+      margin-bottom: 10px;
+    }
+
+    .subheadline {
+      font-size: clamp(12px, 3.2vw, 14px);
+      color: #555;
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+
+    /* ===== VAGAS ===== */
+    #vagas-text {
+      font-size: clamp(13px, 3.5vw, 15px);
+      color: #d10000;
+      margin-bottom: 16px;
+      letter-spacing: 0.3px;
+    }
+
+    #vagas-count {
+      font-size: clamp(15px, 4vw, 17px);
+    }
+
+    @keyframes shake {
+      0%   { transform: translate(0, 0); }
+      20%  { transform: translate(-3px, 0); }
+      40%  { transform: translate(3px, 0); }
+      60%  { transform: translate(-3px, 0); }
+      80%  { transform: translate(3px, 0); }
+      100% { transform: translate(0, 0); }
+    }
+
+    .shake { animation: shake 0.3s ease-in-out; }
+    #vagas-count.last { animation: shake 0.35s ease-in-out infinite; }
+
+    /* ===== BOTÃO PULSANTE ===== */
+    .btn-whatsapp {
+      display: block;
+      background: #25D366;
+      color: #fff;
+      font-size: clamp(12px, 3.5vw, 14px);
+      font-weight: 700;
+      text-decoration: none;
+      padding: 13px 20px;
+      border-radius: 50px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      animation: pulse 1.6s infinite;
+      margin: 4px auto 22px;
+      transition: transform 0.1s;
+      width: fit-content;
+      max-width: 100%;
+    }
+
+    .btn-whatsapp:active { transform: scale(0.97); }
+
+    @keyframes pulse {
+      0%   { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.7); }
+      50%  { box-shadow: 0 0 0 14px rgba(37, 211, 102, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); }
+    }
+
+    /* ===== IMAGEM ABAIXO DO BOTÃO ===== */
+    .image-single {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 22px;
+    }
+
+    .image-single img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 12px;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.1);
+      display: block;
+    }
+
+    /* ===== NOTA CONFIÁVEL ===== */
+    .box-trust {
+      background: #f0faf4;
+      border: 2px solid #25D366;
+      border-radius: 12px;
+      padding: 14px 16px;
+      font-size: clamp(12px, 3.5vw, 14px);
+      color: #1a1a1a;
+      line-height: 1.5;
+      text-align: left;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .box-trust .check { font-size: 20px; flex-shrink: 0; }
+
+    /* ===== RODAPÉ ===== */
+    .footer {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 12px;
+      color: #999;
+      padding-bottom: 20px;
+    }
+
+    /* ===== RESPONSIVO ===== */
+    @media (max-width: 360px) {
+      .wrapper { padding: 54px 8px 32px; }
+      .card-body { padding: 16px 10px 22px; }
+      .header-box { padding: 16px 12px; }
+    }
+
+    @media (min-width: 600px) {
+      .wrapper { padding: 70px 20px 50px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- BARRA TOPO -->
+  <div id="barra-topo">
+    ✨ GRUPO DE ACHADINHOS EXCLUSIVOS ✨
+  </div>
+
+  <!-- POPUP CONTAINER -->
+  <div id="popup-container"></div>
+
+  <div class="wrapper">
+
+    <!-- HEADER -->
+    <div class="header-box">
+      <h1>Venha economizar todos os dias</h1>
+    </div>
+
+    <!-- CARD BODY -->
+    <div class="card-body">
+
+      <p class="headline">ECONOMIZE DE 20% A 80% NAS COMPRAS DO SEU DIA A DIA!</p>
+
+      <p class="subheadline">Já somos centenas de pessoas economizando com as promoções exclusivas do grupo!</p>
+
+      <!-- VAGAS -->
+      <div id="vagas-text">
+        <strong>Restam apenas <span id="vagas-count">35</span> vagas!</strong>
+      </div>
+
+      <!-- BOTÃO PULSANTE -->
+      <a href="https://chat.whatsapp.com/E3j62zlE3Tn9Ik7E28dUv0?mode=gi_t"
+         target="_blank"
+         class="btn-whatsapp">
+        📲 Clique P/ Entrar no Grupo
+      </a>
+
+      <!-- IMAGEM ABAIXO DO BOTÃO -->
+      <div class="image-single">
+        <img src="https://sosmamaeofc.site/wp-content/uploads/2026/02/Design-sem-nome-5-e1764978159825.png" alt="Achadinhos">
+      </div>
+
+      <!-- NOTA CONFIÁVEL -->
+      <div class="box-trust">
+        <span class="check">✅</span>
+        <span>
+          <strong>É CONFIÁVEL?</strong> – Sim, somente os administradores do grupo podem enviar promoções.
+        </span>
+      </div>
+
+    </div><!-- /card-body -->
+
+    <div class="footer">© Achadinhos do Dia a Dia</div>
+
+  </div><!-- /wrapper -->
+
+
+  <script>
+  /* ====================================================
+     BARRA TOPO – esconde ao rolar pra baixo
+  ==================================================== */
+  (function(){
+    let lastScroll = 0;
+    const barra = document.getElementById("barra-topo");
+    window.addEventListener("scroll", function(){
+      const st = window.pageYOffset || document.documentElement.scrollTop;
+      barra.style.transform = st > lastScroll ? "translateY(-100%)" : "translateY(0)";
+      lastScroll = st <= 0 ? 0 : st;
+    }, false);
+  })();
+
+
+  /* ====================================================
+     VAGAS + POPUPS
+  ==================================================== */
+  (function(){
+
+    const nomes = [
+      "Ana Santos","Mariana Costa","Fernanda Lima","Patrícia Duarte",
+      "Rafaela Moura","Juliana Ribeiro","Camila Barros","Carlos Silva",
+      "Larissa Campos","Beatriz Cunha","Pedro Alves","Daniela Martins",
+      "Luana Brito","Natália Prado","Aline Souza","João Oliveira",
+      "Helena Moreira","Sofia Correia","Bruno Rezende","Jéssica Mendes",
+      "Letícia Santiago","Paulo Monteiro","Débora Alves","Taís Carvalho",
+      "Priscila Duarte","Luciana Rocha","Ricardo Barbosa","Silvia Lopes",
+      "Gabriela Freitas","Raissa Nogueira","Eduardo Duarte","Mirella Fernandes",
+      "Thais Prado","Michelle Cardoso","Talita Fernandes","Diego Vasconcelos",
+      "Simone Braga","Vanessa Peixoto","Rodrigo Moreira","Sandra Figueira",
+      "Vitória Duarte","Ludmila Carvalho","Alice Oliveira","Karina Costa",
+      "Taiane Pires","Cristiane Fernandes","Lucas Castro","Olívia Sampaio",
+      "Letícia Lima","Yasmin Ferreira","Evelyn Souza","Felipe Mendes",
+      "Mariana Ribeiro","Larissa Vieira","Amanda Gomes","Thiago Nunes"
+    ];
+
+    function random(min, max){
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function intervalo(n){
+      if (n > 20) return random(3000, 5000);
+      if (n > 10) return random(5000, 8000);
+      if (n > 4)  return random(7000, 11000);
+      return 12000;
+    }
+
+    let current = 35; // começa em 35 vagas
+
+    function updateDisplay(n){
+      const textEl = document.getElementById('vagas-text');
+      if(n === 1){
+        textEl.innerHTML =
+          '<strong>Restam apenas <span id="vagas-count" class="last" style="font-weight:900;color:#d10000;">1</span> vaga!</strong>';
+      } else {
+        textEl.innerHTML =
+          `<strong>Restam apenas <span id="vagas-count" style="font-weight:900;color:#d10000;">${n}</span> vagas!</strong>`;
+      }
+      const el = document.getElementById("vagas-count");
+      if(el){ el.classList.add("shake"); setTimeout(()=>el.classList.remove("shake"), 350); }
+    }
+
+    function mostrarPopup(nome){
+      const container = document.getElementById("popup-container");
+      container.innerHTML = "";
+
+      const div = document.createElement("div");
+      div.className = "popup";
+      div.innerHTML = `
+        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg"
+             style="width:28px;height:28px;" alt="WhatsApp">
+        <div>
+          <strong>${nome}</strong>
+          <small>Entrou no grupo agora</small>
+        </div>
+      `;
+      container.appendChild(div);
+
+      setTimeout(()=>{
+        div.style.animation = "fadeOut 0.5s ease forwards";
+        setTimeout(()=>{ if(div.parentNode) div.remove(); }, 500);
+      }, 4000);
+    }
+
+    function reduzir(){
+      if(current <= 1) return;
+      setTimeout(()=>{
+        current--;
+        updateDisplay(current);
+        const nome = nomes[Math.floor(Math.random() * nomes.length)];
+        mostrarPopup(nome);
+        if(current > 1) reduzir();
+      }, intervalo(current));
+    }
+
+    updateDisplay(current);
+    reduzir();
+
+  })();
+  </script>
+
+</body>
+</html>
