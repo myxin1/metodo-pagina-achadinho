@@ -627,6 +627,9 @@
         <div>
           <label for="lead-wpp">WhatsApp com DDD</label>
           <input type="tel" id="lead-wpp" placeholder="Ex: (11) 99999-9999" autocomplete="tel">
+          <p id="wpp-erro" style="display:none;color:#e53935;font-size:11px;font-weight:600;margin-top:5px;text-align:left;">
+            ⚠️ Digite um WhatsApp válido com DDD (ex: 11 99999-9999)
+          </p>
         </div>
       </div>
 
@@ -701,11 +704,14 @@
     const nome = document.getElementById('lead-nome').value.trim();
     const wpp  = document.getElementById('lead-wpp').value.trim();
 
-    if (!nome || wpp.length < 8) {
-      document.getElementById('lead-nome').style.borderColor = nome ? '#ddd' : '#e53935';
-      document.getElementById('lead-wpp').style.borderColor  = wpp.length >= 8 ? '#ddd' : '#e53935';
-      return;
-    }
+    const digits = wpp.replace(/\D/g, '');
+    const wppValido = digits.length >= 10 && digits.length <= 11;
+
+    document.getElementById('lead-nome').style.borderColor = nome ? '#ddd' : '#e53935';
+    document.getElementById('lead-wpp').style.borderColor  = wppValido ? '#ddd' : '#e53935';
+    document.getElementById('wpp-erro').style.display      = wppValido ? 'none' : 'block';
+
+    if (!nome || !wppValido) return;
 
     // Salva no localStorage
     const leads = JSON.parse(localStorage.getItem('mpa_leads') || '[]');
@@ -738,6 +744,9 @@
         if (v.length > 2) v = '(' + v.slice(0,2) + ') ' + v.slice(2);
         if (v.length > 10) v = v.slice(0,10) + '-' + v.slice(10);
         this.value = v;
+        // Limpa erro ao digitar
+        this.style.borderColor = '#ddd';
+        document.getElementById('wpp-erro').style.display = 'none';
       });
     }
   });
