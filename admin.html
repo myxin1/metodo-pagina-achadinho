@@ -132,6 +132,26 @@
 
     .btn-wpp:hover { background: #1ebe58; }
 
+    .btn-del {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: transparent;
+      color: #e53935;
+      font-family: 'Poppins', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 7px 12px;
+      border-radius: 50px;
+      border: 1.5px solid #e53935;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+
+    .btn-del:hover { background: #e53935; color: #fff; }
+    .btn-del:disabled { opacity: 0.4; cursor: not-allowed; }
+
     .numero-raw {
       font-size: 12px;
       color: #888;
@@ -198,7 +218,7 @@
           <th>WhatsApp</th>
           <th>Respostas do Quiz</th>
           <th>Data</th>
-          <th>Contato</th>
+          <th>Ações</th>
         </tr>
       </thead>
       <tbody id="tbody"></tbody>
@@ -259,7 +279,7 @@ Com base no seu perfil, o Método é exatamente o que você precisa: uma *Landin
         const wpp  = (issue.body.match(/\*\*WhatsApp:\*\* (.+)/) || [])[1]?.trim() || '–';
         const data = (issue.body.match(/\*\*Data:\*\* (.+)/)     || [])[1]?.trim() || '–';
 
-        // Extrai respostas do quiz (blocos "**N. Pergunta**\n> Resposta")
+        // Extrai respostas do quiz
         const historico = [];
         const reBloco = /\*\*\d+\. (.+?)\*\*\n> (.+)/g;
         let m;
@@ -267,7 +287,7 @@ Com base no seu perfil, o Método é exatamente o que você precisa: uma *Landin
           historico.push({ pergunta: m[1].trim(), resposta: m[2].trim() });
         }
 
-        return { i: issues.length - i, nome, wpp, data, historico };
+        return { i: issues.length - i, issueNumber: issue.number, nome, wpp, data, historico };
       });
 
       renderizar();
@@ -316,10 +336,9 @@ Com base no seu perfil, o Método é exatamente o que você precisa: uma *Landin
           </td>
           <td style="font-size:11px;max-width:220px;">${respostasHtml}</td>
           <td style="color:#888;font-size:11px;white-space:nowrap;">${l.data}</td>
-          <td>
-            <a class="btn-wpp" href="${wppLink}" target="_blank">
-              💬 Contatar
-            </a>
+          <td style="white-space:nowrap;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <a class="btn-wpp" href="${wppLink}" target="_blank">💬 Contatar</a>
+            <button class="btn-del" id="del-${l.issueNumber}" onclick="excluirLead(${l.issueNumber})">🗑 Excluir</button>
           </td>
         </tr>
       `;
@@ -338,6 +357,37 @@ Com base no seu perfil, o Método é exatamente o que você precisa: uma *Landin
     a.href       = URL.createObjectURL(blob);
     a.download   = `leads-achadinho-${new Date().toLocaleDateString('pt-BR').replace(/\//g,'-')}.csv`;
     a.click();
+  }
+
+  async function excluirLead(issueNumber) {
+    if (!confirm('Excluir este lead? A ação não pode ser desfeita.')) return;
+
+    const btn = document.getElementById('del-' + issueNumber);
+    btn.disabled = true;
+    btn.textContent = '⏳';
+
+    try {
+      const res = await fetch('/api/delete-lead', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ issueNumber })
+      });
+
+      if (res.ok) {
+        // Remove da lista local e re-renderiza sem recarregar do GitHub
+        allLeads = allLeads.filter(l => l.issueNumber !== issueNumber);
+        document.getElementById('total-leads').textContent = allLeads.length;
+        renderizar();
+      } else {
+        btn.disabled = false;
+        btn.textContent = '🗑 Excluir';
+        alert('Erro ao excluir. Tente novamente.');
+      }
+    } catch {
+      btn.disabled = false;
+      btn.textContent = '🗑 Excluir';
+      alert('Erro de conexão. Tente novamente.');
+    }
   }
 
   carregarLeads();
