@@ -712,10 +712,10 @@
     leads.push({ nome, wpp, data: new Date().toLocaleString('pt-BR') });
     localStorage.setItem('mpa_leads', JSON.stringify(leads));
 
-    // Envia para Formspree (captura remota)
-    fetch('https://formspree.io/f/lopesm7@gmail.com', {
+    // Envia para API do servidor (salva como issue no GitHub)
+    fetch('/api/lead', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ nome, whatsapp: wpp })
     }).catch(() => {}); // silencia erros de rede
 

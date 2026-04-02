@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin – Leads Capturados</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #0f1117;
+      color: #fff;
+      min-height: 100vh;
+      padding: 32px 16px;
+    }
+
+    .header {
+      max-width: 700px;
+      margin: 0 auto 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .header h1 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #25D366;
+    }
+
+    .header span { font-size: 13px; color: #666; }
+
+    .stats {
+      max-width: 700px;
+      margin: 0 auto 24px;
+      display: flex;
+      gap: 12px;
+    }
+
+    .stat-box {
+      background: #1a1d27;
+      border: 1px solid #2a2d3a;
+      border-radius: 12px;
+      padding: 16px 20px;
+      flex: 1;
+      text-align: center;
+    }
+
+    .stat-box .num {
+      font-size: 28px;
+      font-weight: 900;
+      color: #25D366;
+    }
+
+    .stat-box .label {
+      font-size: 12px;
+      color: #888;
+      margin-top: 2px;
+    }
+
+    .btn-export {
+      display: inline-block;
+      background: #25D366;
+      color: #fff;
+      font-family: 'Poppins', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 10px 20px;
+      border-radius: 50px;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .table-wrap {
+      max-width: 700px;
+      margin: 0 auto;
+      background: #1a1d27;
+      border-radius: 16px;
+      border: 1px solid #2a2d3a;
+      overflow: hidden;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead tr {
+      background: #22263a;
+    }
+
+    th {
+      text-align: left;
+      padding: 14px 18px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #888;
+    }
+
+    td {
+      padding: 14px 18px;
+      font-size: 13px;
+      color: #ddd;
+      border-top: 1px solid #22263a;
+    }
+
+    tr:hover td { background: #1e2133; }
+
+    .wpp-link {
+      color: #25D366;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 48px 20px;
+      color: #555;
+      font-size: 14px;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 48px;
+      color: #555;
+    }
+
+    .dot {
+      display: inline-block;
+      animation: blink 1.2s infinite;
+    }
+    .dot:nth-child(2) { animation-delay: 0.2s; }
+    .dot:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes blink {
+      0%, 80%, 100% { opacity: 0; }
+      40% { opacity: 1; }
+    }
+
+    .badge {
+      display: inline-block;
+      background: rgba(37,211,102,0.15);
+      color: #25D366;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 99px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>🧲 Leads Capturados</h1>
+    <span id="ultima-atualizacao">Carregando...</span>
+  </div>
+
+  <div class="stats">
+    <div class="stat-box">
+      <div class="num" id="total-leads">–</div>
+      <div class="label">Total de leads</div>
+    </div>
+    <div class="stat-box">
+      <div class="num" id="hoje-leads">–</div>
+      <div class="label">Hoje</div>
+    </div>
+    <div class="stat-box" style="flex:auto;text-align:right;background:transparent;border:none;">
+      <button class="btn-export" onclick="exportarCSV()">⬇ Exportar CSV</button>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <div class="loading" id="loading">
+      Carregando leads<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span>
+    </div>
+    <table id="tabela" style="display:none">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Nome</th>
+          <th>WhatsApp</th>
+          <th>Data</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    <div class="empty" id="empty" style="display:none">
+      Nenhum lead capturado ainda. Aguarde as primeiras conversões!
+    </div>
+  </div>
+
+  <script>
+  const REPO = 'myxin1/metodo-pagina-achadinho';
+  let allLeads = [];
+
+  async function carregarLeads() {
+    try {
+      // Busca issues com label "lead" (até 100 por página)
+      const res = await fetch(
+        `https://api.github.com/repos/${REPO}/issues?labels=lead&state=open&per_page=100&sort=created&direction=desc`,
+        { headers: { 'Accept': 'application/vnd.github.v3+json' } }
+      );
+      const issues = await res.json();
+
+      if (!Array.isArray(issues)) throw new Error('Resposta inválida');
+
+      allLeads = issues.map((issue, i) => {
+        // Extrai dados do body da issue
+        const nome = (issue.body.match(/\*\*Nome:\*\* (.+)/) || [])[1] || '–';
+        const wpp  = (issue.body.match(/\*\*WhatsApp:\*\* (.+)/) || [])[1] || '–';
+        const data = (issue.body.match(/\*\*Data:\*\* (.+)/) || [])[1] || '–';
+        return { i: issues.length - i, nome, wpp, data };
+      });
+
+      renderizar();
+    } catch (e) {
+      document.getElementById('loading').textContent = 'Erro ao carregar leads. Tente recarregar.';
+    }
+  }
+
+  function renderizar() {
+    document.getElementById('loading').style.display = 'none';
+
+    const hoje = new Date().toLocaleDateString('pt-BR');
+    const hojeCount = allLeads.filter(l => l.data.startsWith(hoje)).length;
+
+    document.getElementById('total-leads').textContent = allLeads.length;
+    document.getElementById('hoje-leads').textContent = hojeCount;
+    document.getElementById('ultima-atualizacao').textContent =
+      'Atualizado: ' + new Date().toLocaleTimeString('pt-BR');
+
+    if (allLeads.length === 0) {
+      document.getElementById('empty').style.display = 'block';
+      return;
+    }
+
+    const tbody = document.getElementById('tbody');
+    tbody.innerHTML = allLeads.map(l => `
+      <tr>
+        <td><span class="badge">#${l.i}</span></td>
+        <td>${l.nome}</td>
+        <td>
+          <a class="wpp-link"
+             href="https://wa.me/55${l.wpp.replace(/\D/g,'')}"
+             target="_blank">
+            📱 ${l.wpp}
+          </a>
+        </td>
+        <td>${l.data}</td>
+      </tr>
+    `).join('');
+
+    document.getElementById('tabela').style.display = 'table';
+  }
+
+  function exportarCSV() {
+    if (!allLeads.length) return alert('Nenhum lead para exportar.');
+    const header = 'Nome,WhatsApp,Data';
+    const rows = allLeads.map(l => `"${l.nome}","${l.wpp}","${l.data}"`);
+    const csv = [header, ...rows].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'leads-achadinho.csv';
+    a.click();
+  }
+
+  carregarLeads();
+  // Atualiza a cada 60 segundos
+  setInterval(carregarLeads, 60000);
+  </script>
+
+</body>
+</html>
