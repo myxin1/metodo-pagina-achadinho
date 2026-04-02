@@ -269,26 +269,15 @@
       border-radius: 12px;
       overflow: hidden;
       margin-bottom: 18px;
-      background: #ddd;
+      background: #000;
+      aspect-ratio: 1 / 1;
     }
 
-    .res-img-wrap img {
+    .res-img-wrap video {
       width: 100%;
+      height: 100%;
+      object-fit: cover;
       display: block;
-      border-radius: 12px;
-    }
-
-    .res-img-placeholder {
-      width: 100%;
-      aspect-ratio: 9/16;
-      max-height: 320px;
-      background: #e0e0e0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #999;
-      font-size: 13px;
-      font-weight: 600;
       border-radius: 12px;
     }
 
@@ -342,14 +331,72 @@
       background-position: center;
     }
 
+    /* ===== DOMÍNIO INFO ===== */
+    .domain-info {
+      background: #eef7ff;
+      border: 1.5px solid #b3d4f0;
+      border-radius: 12px;
+      padding: 12px 16px;
+      margin-bottom: 18px;
+      font-size: clamp(11px, 3vw, 13px);
+      color: #2c5f8a;
+      line-height: 1.6;
+      text-align: left;
+    }
+
+    .domain-info strong { color: #1a4a70; }
+    .domain-info code {
+      background: #d0e9ff;
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-family: monospace;
+    }
+
+    /* ===== FORMULÁRIO DE CAPTURA ===== */
+    .lead-form {
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 16px;
+      animation: fadeUp 0.3s ease;
+    }
+
+    .lead-form.show { display: flex; }
+
+    .lead-form label {
+      font-size: 12px;
+      font-weight: 700;
+      color: #444;
+      margin-bottom: 3px;
+      display: block;
+      text-align: left;
+    }
+
+    .lead-form input {
+      width: 100%;
+      padding: 13px 16px;
+      border: 2px solid #ddd;
+      border-radius: 10px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 14px;
+      color: #222;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .lead-form input:focus { border-color: #25D366; }
+    .lead-form input::placeholder { color: #aaa; }
+
+    /* ===== BOTÃO CTA ===== */
     .btn-cta {
       display: block;
       width: 100%;
-      padding: 16px;
+      padding: 15px;
       background: #f5a623;
       color: #fff;
       font-family: 'Poppins', sans-serif;
-      font-size: clamp(14px, 4vw, 16px);
+      font-size: clamp(13px, 3.8vw, 15px);
       font-weight: 800;
       border: none;
       border-radius: 50px;
@@ -358,6 +405,7 @@
       letter-spacing: 0.3px;
       animation: pulse 1.8s infinite;
       transition: transform 0.1s;
+      text-align: center;
     }
 
     .btn-cta:active { transform: scale(0.98); }
@@ -366,6 +414,19 @@
       0%   { box-shadow: 0 0 0 0 rgba(245,166,35,0.6); }
       60%  { box-shadow: 0 0 0 16px rgba(245,166,35,0); }
       100% { box-shadow: 0 0 0 0 rgba(245,166,35,0); }
+    }
+
+    .lead-success {
+      display: none;
+      background: #f0faf4;
+      border: 1.5px solid #25D366;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 13px;
+      color: #1a6e38;
+      font-weight: 600;
+      margin-bottom: 12px;
+      text-align: center;
     }
 
     /* ===== FOOTER ===== */
@@ -534,8 +595,7 @@
 
       <!-- VÍDEO -->
       <div class="res-img-wrap">
-        <video controls autoplay muted playsinline
-               style="width:100%;border-radius:12px;display:block;">
+        <video controls autoplay muted playsinline>
           <source src="video.mp4" type="video/mp4">
         </video>
       </div>
@@ -550,7 +610,28 @@
         </ul>
       </div>
 
-      <a href="https://pay.kiwify.com.br/9VfZih9" target="_blank" class="btn-cta">Descobrir Como Começar! →</a>
+      <!-- DOMÍNIO INFO -->
+      <div class="domain-info">
+        🌐 Sua página ficará disponível em um link personalizado como:<br>
+        <code>NomeDoSeuGrupo.vercel.app</code> — pronto pra compartilhar e anunciar!
+      </div>
+
+      <!-- FORMULÁRIO DE CAPTURA -->
+      <div class="lead-success" id="lead-success">✅ Dados salvos! Redirecionando para o checkout...</div>
+
+      <div class="lead-form" id="lead-form">
+        <div>
+          <label for="lead-nome">Seu nome</label>
+          <input type="text" id="lead-nome" placeholder="Ex: Maria Silva" autocomplete="name">
+        </div>
+        <div>
+          <label for="lead-wpp">WhatsApp com DDD</label>
+          <input type="tel" id="lead-wpp" placeholder="Ex: (11) 99999-9999" autocomplete="tel">
+        </div>
+      </div>
+
+      <!-- BOTÃO CTA (duas fases) -->
+      <button class="btn-cta" id="btn-cta" onclick="ctaClick()">Descobrir Como Começar! →</button>
     </div>
 
   </div><!-- /card -->
@@ -602,6 +683,64 @@
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
+
+  /* ===== LÓGICA DO BOTÃO CTA (2 fases) ===== */
+  let ctaFase = 1;
+
+  function ctaClick() {
+    if (ctaFase === 1) {
+      // Fase 1 → mostra formulário
+      document.getElementById('lead-form').classList.add('show');
+      document.getElementById('btn-cta').textContent = 'Quero Começar Agora →';
+      document.getElementById('lead-nome').focus();
+      ctaFase = 2;
+      return;
+    }
+
+    // Fase 2 → valida e salva lead
+    const nome = document.getElementById('lead-nome').value.trim();
+    const wpp  = document.getElementById('lead-wpp').value.trim();
+
+    if (!nome || wpp.length < 8) {
+      document.getElementById('lead-nome').style.borderColor = nome ? '#ddd' : '#e53935';
+      document.getElementById('lead-wpp').style.borderColor  = wpp.length >= 8 ? '#ddd' : '#e53935';
+      return;
+    }
+
+    // Salva no localStorage
+    const leads = JSON.parse(localStorage.getItem('mpa_leads') || '[]');
+    leads.push({ nome, wpp, data: new Date().toLocaleString('pt-BR') });
+    localStorage.setItem('mpa_leads', JSON.stringify(leads));
+
+    // Envia para Formspree (captura remota)
+    fetch('https://formspree.io/f/lopesm7@gmail.com', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({ nome, whatsapp: wpp })
+    }).catch(() => {}); // silencia erros de rede
+
+    // Feedback e redirect
+    document.getElementById('lead-form').style.display = 'none';
+    document.getElementById('btn-cta').style.display = 'none';
+    document.getElementById('lead-success').style.display = 'block';
+
+    setTimeout(() => {
+      window.open('https://pay.kiwify.com.br/9VfZih9', '_blank');
+    }, 1500);
+  }
+
+  // Máscara de telefone
+  document.addEventListener('DOMContentLoaded', () => {
+    const wppInput = document.getElementById('lead-wpp');
+    if (wppInput) {
+      wppInput.addEventListener('input', function() {
+        let v = this.value.replace(/\D/g, '').slice(0, 11);
+        if (v.length > 2) v = '(' + v.slice(0,2) + ') ' + v.slice(2);
+        if (v.length > 10) v = v.slice(0,10) + '-' + v.slice(10);
+        this.value = v;
+      });
+    }
+  });
   </script>
 
 </body>
