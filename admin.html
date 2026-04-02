@@ -367,7 +367,7 @@ Com base no seu perfil, o Método é exatamente o que você precisa: uma *Landin
     btn.textContent = '⏳';
 
     try {
-      const res = await fetch('/api/delete-lead', {
+      const res = await fetch('https://metodo-pagina-achadinho.vercel.app/api/delete-lead', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ issueNumber })
