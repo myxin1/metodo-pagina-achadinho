@@ -1,5 +1,4 @@
 export default async function handler(req, res) {
-  // Permite CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -7,7 +6,7 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { nome, whatsapp } = req.body || {};
+  const { nome, whatsapp, historico } = req.body || {};
 
   if (!nome || !whatsapp) {
     return res.status(400).json({ error: 'Nome e WhatsApp são obrigatórios' });
@@ -16,6 +15,15 @@ export default async function handler(req, res) {
   const token = process.env.GITHUB_TOKEN;
   const repo  = 'myxin1/metodo-pagina-achadinho';
   const now   = new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+
+  // Monta bloco de histórico do quiz
+  let historicoMd = '';
+  if (Array.isArray(historico) && historico.length) {
+    historicoMd = '\n\n## 📋 Respostas do Quiz\n\n' +
+      historico.map((h, i) =>
+        `**${i + 1}. ${h.pergunta}**\n> ${h.resposta}`
+      ).join('\n\n');
+  }
 
   try {
     const response = await fetch(`https://api.github.com/repos/${repo}/issues`, {
@@ -28,7 +36,7 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         title: `🧲 Lead: ${nome} — ${whatsapp}`,
-        body: `## Novo Lead Capturado\n\n**Nome:** ${nome}\n**WhatsApp:** ${whatsapp}\n**Data:** ${now}`,
+        body: `## Novo Lead Capturado\n\n**Nome:** ${nome}\n**WhatsApp:** ${whatsapp}\n**Data:** ${now}${historicoMd}`,
         labels: ['lead']
       })
     });

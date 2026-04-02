@@ -196,6 +196,7 @@
           <th>#</th>
           <th>Nome</th>
           <th>WhatsApp</th>
+          <th>Respostas do Quiz</th>
           <th>Data</th>
           <th>Contato</th>
         </tr>
@@ -212,14 +213,23 @@
   const CHECKOUT = 'https://pay.kiwify.com.br/9VfZih9';
   let allLeads   = [];
 
-  // Mensagem pré-definida para o WhatsApp
-  function mensagemWpp(nome) {
+  // Mensagem pré-definida para o WhatsApp (com histórico do quiz)
+  function mensagemWpp(lead) {
+    const { nome, historico } = lead;
+
+    // Bloco personalizado baseado nas respostas
+    let blocoQuiz = '';
+    if (historico && historico.length) {
+      blocoQuiz = '\n\n📋 *Vi suas respostas no quiz:*\n' +
+        historico.map(h => `• *${h.pergunta}*\n  → ${h.resposta}`).join('\n');
+    }
+
     return encodeURIComponent(
 `Olá, ${nome}! 👋
 
-Vi que você demonstrou interesse no *Método Página Achadinho* e quero te ajudar a dar o próximo passo! 🚀
+Vi que você demonstrou interesse no *Método Página Achadinho* e quero te ajudar a dar o próximo passo! 🚀${blocoQuiz}
 
-Com o Método, você recebe uma *Landing Page profissional e completa*, ideal para captar leads qualificados e encher seus grupos de achadinhos todos os dias — usando tráfego orgânico ou pago.
+Com base no seu perfil, o Método é exatamente o que você precisa: uma *Landing Page profissional e completa* para captar leads qualificados e encher seus grupos de achadinhos todos os dias — com tráfego orgânico ou pago.
 
 ✅ Grupos lotados de leads quentes
 ✅ Leads prontos para comprar
@@ -248,7 +258,16 @@ Com o Método, você recebe uma *Landing Page profissional e completa*, ideal pa
         const nome = (issue.body.match(/\*\*Nome:\*\* (.+)/) || [])[1]?.trim() || '–';
         const wpp  = (issue.body.match(/\*\*WhatsApp:\*\* (.+)/) || [])[1]?.trim() || '–';
         const data = (issue.body.match(/\*\*Data:\*\* (.+)/)     || [])[1]?.trim() || '–';
-        return { i: issues.length - i, nome, wpp, data };
+
+        // Extrai respostas do quiz (blocos "**N. Pergunta**\n> Resposta")
+        const historico = [];
+        const reBloco = /\*\*\d+\. (.+?)\*\*\n> (.+)/g;
+        let m;
+        while ((m = reBloco.exec(issue.body)) !== null) {
+          historico.push({ pergunta: m[1].trim(), resposta: m[2].trim() });
+        }
+
+        return { i: issues.length - i, nome, wpp, data, historico };
       });
 
       renderizar();
@@ -276,7 +295,17 @@ Com o Método, você recebe uma *Landing Page profissional e completa*, ideal pa
     const tbody = document.getElementById('tbody');
     tbody.innerHTML = allLeads.map(l => {
       const numeroLimpo = l.wpp.replace(/\D/g, '');
-      const wppLink     = `https://wa.me/55${numeroLimpo}?text=${mensagemWpp(l.nome)}`;
+      const wppLink     = `https://wa.me/55${numeroLimpo}?text=${mensagemWpp(l)}`;
+
+      const respostasHtml = l.historico && l.historico.length
+        ? l.historico.map(h =>
+            `<div style="margin-bottom:4px;">
+               <span style="color:#888;font-size:10px;">${h.pergunta}</span><br>
+               <span style="font-size:12px;font-weight:600;color:#ddd;">${h.resposta}</span>
+             </div>`
+          ).join('')
+        : '<span style="color:#555;font-size:11px;">Sem respostas registradas</span>';
+
       return `
         <tr>
           <td><span class="badge">#${l.i}</span></td>
@@ -285,10 +314,11 @@ Com o Método, você recebe uma *Landing Page profissional e completa*, ideal pa
             ${l.wpp}
             <span class="numero-raw">55${numeroLimpo}</span>
           </td>
-          <td style="color:#888;font-size:12px;">${l.data}</td>
+          <td style="font-size:11px;max-width:220px;">${respostasHtml}</td>
+          <td style="color:#888;font-size:11px;white-space:nowrap;">${l.data}</td>
           <td>
             <a class="btn-wpp" href="${wppLink}" target="_blank">
-              💬 Entrar em contato
+              💬 Contatar
             </a>
           </td>
         </tr>

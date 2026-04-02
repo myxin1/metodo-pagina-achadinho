@@ -644,9 +644,21 @@
   <script>
   const totalSteps = 4;
 
+  // Perguntas e respostas selecionadas
+  const perguntas = [
+    'Você tem dificuldade em atrair membros para o seu grupo?',
+    'Como você divulga seu grupo hoje?',
+    'Quantos membros têm seus grupos hoje?',
+    'Qual é o seu maior desafio com os grupos agora?'
+  ];
+  const respostas = {}; // { 1: 'texto da opção', 2: '...', ... }
+
   function escolher(el, step) {
     el.closest('.options').querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
     el.classList.add('selected');
+
+    // Salva o texto da opção escolhida (sem o emoji)
+    respostas[step] = el.innerText.trim();
 
     const btn = document.getElementById('btn-' + step);
     if (btn) btn.classList.add('enabled');
@@ -713,16 +725,22 @@
 
     if (!nome || !wppValido) return;
 
+    // Monta histórico de respostas
+    const historico = perguntas.map((p, i) => ({
+      pergunta: p,
+      resposta: respostas[i + 1] || '—'
+    }));
+
     // Salva no localStorage
     const leads = JSON.parse(localStorage.getItem('mpa_leads') || '[]');
-    leads.push({ nome, wpp, data: new Date().toLocaleString('pt-BR') });
+    leads.push({ nome, wpp, historico, data: new Date().toLocaleString('pt-BR') });
     localStorage.setItem('mpa_leads', JSON.stringify(leads));
 
     // Envia para API do servidor (salva como issue no GitHub)
     fetch('/api/lead', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ nome, whatsapp: wpp })
+      body: JSON.stringify({ nome, whatsapp: wpp, historico })
     }).catch(() => {}); // silencia erros de rede
 
     // Feedback e redirect
