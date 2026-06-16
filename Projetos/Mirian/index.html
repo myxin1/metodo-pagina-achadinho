@@ -379,5 +379,21 @@
   })();
   </script>
 
+  <script>
+    // Carrega o link do grupo dinamicamente a partir do painel admin
+    (function() {
+      fetch('/api/mirian-config')
+        .then(function(r){ return r.json(); })
+        .then(function(d){
+          if (d.link) {
+            document.querySelectorAll('.btn-whatsapp').forEach(function(a){
+              a.href = d.link;
+            });
+          }
+        })
+        .catch(function(){});
+    })();
+  </script>
+
 </body>
 </html>
